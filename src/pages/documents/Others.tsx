@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import {
-  FolderOpen,
   Upload,
   Search,
   Edit,
@@ -138,10 +137,10 @@ export default function OthersPage() {
             <Separator orientation="vertical" className="mr-2 h-4" />
             <Breadcrumb>
               <BreadcrumbList>
-                <BreadcrumbItem>
+                <BreadcrumbItem className="hidden sm:inline-flex">
                   <BreadcrumbLink href="/dashboard" className="text-muted-foreground">Centro de Control</BreadcrumbLink>
                 </BreadcrumbItem>
-                <BreadcrumbSeparator />
+                <BreadcrumbSeparator className="hidden sm:block" />
                 <BreadcrumbItem>
                   <BreadcrumbPage className="text-muted-foreground">Gestión de Documentos</BreadcrumbPage>
                 </BreadcrumbItem>
@@ -189,7 +188,7 @@ export default function OthersPage() {
                     </div>
                   ) : filtered.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
-                      <img src="/icono_otros.svg" alt="visor" className="size-16 mx-auto opacity-50" />
+                      <img src="/icono_otros.svg" alt="visor" className="size-36 mx-auto opacity-50" />
                       <p className="font-medium">{search ? "Sin resultados." : "No hay otros documentos en este directorio."}</p>
                       <p className="text-sm mt-1">{search ? "Intenta con otra búsqueda." : "Sube un archivo importante con el botón de arriba."}</p>
                     </div>
@@ -201,8 +200,8 @@ export default function OthersPage() {
                           onClick={() => setSelectedId(doc.id)}
                           className={`p-4 flex items-start gap-3 cursor-pointer hover:bg-muted/50 transition-colors ${selectedId === doc.id ? "bg-muted/50 border-l-4 border-l-violet-500" : "border-l-4 border-l-transparent"}`}
                         >
-                          <div className="p-2 bg-violet-500/10 rounded-lg text-violet-500 shrink-0">
-                            <img src="/icono_otros.svg" alt="otro" className="size-4" />
+                          <div className="p-4 bg-violet-500/10 rounded-lg text-violet-500 shrink-0">
+                            <img src="/icono_otros.svg" alt="otro" className="size-20" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-sm truncate text-foreground">{doc.name}</p>
@@ -250,14 +249,14 @@ export default function OthersPage() {
                 <CardContent className="p-0 flex-1 bg-muted/10 relative flex items-center justify-center">
                   {selectedOther ? (
                     <div className="text-center p-8">
-                      <FolderOpen className="size-16 mb-4 text-violet-500/20 mx-auto" />
+                      <img src="/icono_otros.svg" alt="visor" className="size-36 mx-auto opacity-50" />
                       <p className="font-medium text-lg">{selectedOther.name}</p>
                       <p className="text-sm text-muted-foreground mt-2">{selectedOther.description}</p>
                       <p className="text-xs text-muted-foreground mt-4">Categoría: {selectedOther.category}</p>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center text-muted-foreground p-6 text-center">
-                      <img src="/icono_otros.svg" alt="visor" className="size-16 mx-auto opacity-50" />
+                      <img src="/icono_otros.svg" alt="visor" className="size-36 mx-auto opacity-50" />
                       <p className="font-medium">El visor está listo.</p>
                       <p className="text-sm mt-1">Selecciona un documento del panel izquierdo.</p>
                     </div>

@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import {
-  Receipt,
   Upload,
   Search,
   Edit,
@@ -141,10 +140,10 @@ export default function InvoicesPage() {
             <Separator orientation="vertical" className="mr-2 h-4" />
             <Breadcrumb>
               <BreadcrumbList>
-                <BreadcrumbItem>
+                <BreadcrumbItem className="hidden sm:inline-flex">
                   <BreadcrumbLink href="/dashboard" className="text-muted-foreground">Centro de Control</BreadcrumbLink>
                 </BreadcrumbItem>
-                <BreadcrumbSeparator />
+                <BreadcrumbSeparator className="hidden sm:block" />
                 <BreadcrumbItem>
                   <BreadcrumbPage className="text-muted-foreground">Gestión de Documentos</BreadcrumbPage>
                 </BreadcrumbItem>
@@ -192,7 +191,7 @@ export default function InvoicesPage() {
                     </div>
                   ) : filtered.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
-                      <img src="/icono_facturas.svg" alt="visor" className="size-16 mx-auto opacity-50" />
+                      <img src="/icono_facturas.svg" alt="visor" className="size-36 mx-auto opacity-50" />
                       <p className="font-medium">{search ? "Sin resultados." : "No hay facturas registradas."}</p>
                       <p className="text-sm mt-1">{search ? "Intenta con otra búsqueda." : "Registra la primera con el botón de arriba."}</p>
                     </div>
@@ -204,8 +203,8 @@ export default function InvoicesPage() {
                           onClick={() => setSelectedId(inv.id)}
                           className={`p-4 flex items-start gap-3 cursor-pointer hover:bg-muted/50 transition-colors ${selectedId === inv.id ? "bg-muted/50 border-l-4 border-l-emerald-500" : "border-l-4 border-l-transparent"}`}
                         >
-                          <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500 shrink-0">
-                            <img src="/icono_facturas.svg" alt="factura" className="size-4" />
+                          <div className="p-4 bg-emerald-500/10 rounded-lg text-emerald-500 shrink-0">
+                            <img src="/icono_facturas.svg" alt="factura" className="size-20" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-sm truncate text-foreground">{inv.client_name}</p>
@@ -253,14 +252,14 @@ export default function InvoicesPage() {
                 <CardContent className="p-0 flex-1 bg-muted/10 relative flex items-center justify-center">
                   {selectedInvoice ? (
                     <div className="text-center">
-                      <img src="/icono_facturas.svg" alt="visor" className="size-16 mx-auto opacity-50" />
+                      <img src="/icono_facturas.svg" alt="visor" className="size-36 mx-auto opacity-50" />
                       <p className="font-medium">Factura N° {selectedInvoice.invoice_number}</p>
                       <p className="text-sm text-muted-foreground mt-1">Cliente: {selectedInvoice.client_name}</p>
                       <p className="text-lg font-bold text-emerald-600 mt-2">S/ {Number(selectedInvoice.amount).toFixed(2)}</p>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center text-muted-foreground p-6 text-center">
-                      <Receipt className="size-16 mb-4 text-emerald-500/20 opacity-50" />
+                      <img src="/icono_facturas.svg" alt="visor" className="size-36 mx-auto opacity-50" />
                       <p className="font-medium">El visor está listo.</p>
                       <p className="text-sm mt-1">Selecciona una factura del panel izquierdo.</p>
                     </div>

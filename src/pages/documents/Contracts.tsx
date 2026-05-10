@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { 
-  FileSignature, 
   Upload,
   Search,
   Edit,
@@ -250,10 +249,10 @@ export default function ContractsPage() {
             <Separator orientation="vertical" className="mr-2 h-4" />
             <Breadcrumb>
               <BreadcrumbList>
-                <BreadcrumbItem>
+                <BreadcrumbItem className="hidden sm:inline-flex">
                   <BreadcrumbLink href="/dashboard" className="text-muted-foreground">Centro de Control</BreadcrumbLink>
                 </BreadcrumbItem>
-                <BreadcrumbSeparator />
+                <BreadcrumbSeparator className="hidden sm:block" />
                 <BreadcrumbItem>
                   <BreadcrumbPage className="text-muted-foreground">Gestión de Documentos</BreadcrumbPage>
                 </BreadcrumbItem>
@@ -304,7 +303,7 @@ export default function ContractsPage() {
                     </div>
                   ) : filtered.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
-                      <FileSignature className="size-12 mb-4 text-primary/20" />
+                      <img src="/icono_contratos.svg" alt="contrato" className="size-28 mx-auto opacity-50" />
                       <p className="font-medium">{search ? "Sin resultados." : "No hay contratos registrados."}</p>
                       <p className="text-sm mt-1">{search ? "Intenta con otra búsqueda." : "Sube el primero con el botón de arriba."}</p>
                     </div>
@@ -319,8 +318,8 @@ export default function ContractsPage() {
                             selectedId === doc.id ? "bg-muted/50 border-l-4 border-l-primary" : "border-l-4 border-l-transparent"
                           )}
                         >
-                          <div className="p-2 shrink-0">
-                            <img src="/icono_contratos.svg" alt="contrato" className="size-4" />
+                          <div className="p-4 shrink-0">
+                            <img src="/icono_contratos.svg" alt="contrato" className="size-20" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-sm truncate text-foreground">{doc.worker_name}</p>
@@ -375,7 +374,7 @@ export default function ContractsPage() {
                     />
                   ) : (
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground p-6 text-center">
-                      <img src="/icono_contratos.svg" alt="visor" className="size-16 mx-auto opacity-50" />
+                      <img src="/icono_contratos.svg" alt="visor" className="size-36 mx-auto opacity-50" />
                       <p className="font-medium">El visor está listo.</p>
                       <p className="text-sm mt-1">Selecciona un documento del panel izquierdo.</p>
                     </div>
