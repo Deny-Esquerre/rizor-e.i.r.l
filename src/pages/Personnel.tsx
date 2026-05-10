@@ -10,9 +10,7 @@ import {
   AlertTriangle,
   Phone,
   CreditCard,
-  MapPin,
-  Briefcase,
-  DollarSign
+  MapPin
 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { CustomSidebar } from "@/components/custom-sidebar"
@@ -52,13 +50,8 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu"
@@ -72,7 +65,6 @@ import {
   SelectSeparator,
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { toast } from "sonner"
 
 interface PersonnelMember {
@@ -138,21 +130,6 @@ export default function PersonnelPage() {
     }
     setLoading(false)
   }
-
-  // Stats
-  const stats = React.useMemo(() => {
-    const totalMembers = members.length
-    const totalPayroll = members.reduce((acc, m) => acc + Number(m.monthly_salary), 0)
-    const uniqueAreas = new Set(members.map(m => m.area)).size
-    const averageSalary = totalMembers > 0 ? totalPayroll / totalMembers : 0
-
-    return {
-      totalMembers,
-      totalPayroll,
-      uniqueAreas,
-      averageSalary
-    }
-  }, [members])
 
   const handleSelectChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))

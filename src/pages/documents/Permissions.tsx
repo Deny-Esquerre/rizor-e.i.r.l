@@ -1,4 +1,3 @@
-import * as React from "react"
 import { CustomSidebar } from "@/components/custom-sidebar"
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"

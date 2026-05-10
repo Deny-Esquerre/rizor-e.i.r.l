@@ -9,14 +9,11 @@ import { Separator } from "@/components/ui/separator"
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { 
   Card, 
-  CardContent, 
   CardDescription, 
   CardHeader, 
   CardTitle,
@@ -66,12 +63,10 @@ import {
   Search, 
   Filter, 
   Plus, 
-  Eye, 
   Pencil, 
   Trash2,
   TrendingUp,
   TrendingDown,
-  Wallet,
   Calendar as CalendarIcon,
   ArrowUpRight,
   ArrowDownRight,

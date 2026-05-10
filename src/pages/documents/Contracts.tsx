@@ -146,7 +146,6 @@ export default function ContractsPage() {
 
       // Si hay archivo nuevo, subir a Storage
       if (selectedFile) {
-        const ext = ".pdf"
         const uniquePath = `${Date.now()}_${selectedFile.name.replace(/\s+/g, "_")}`
         
         // Si estamos editando, borrar el archivo viejo
