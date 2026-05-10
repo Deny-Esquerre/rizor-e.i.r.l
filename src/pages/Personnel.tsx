@@ -274,7 +274,7 @@ export default function PersonnelPage() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/dashboard">ERP System</BreadcrumbLink>
+                  <BreadcrumbLink href="/dashboard">Centro de Control</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
