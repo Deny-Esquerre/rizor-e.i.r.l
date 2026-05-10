@@ -10,9 +10,10 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
-import { GalleryVerticalEndIcon, Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
+import logoUrl from "@/assets/2018/2.2.png"
 
 import { supabase } from "@/lib/supabase"
 
@@ -75,9 +76,11 @@ export function LoginForm({
               href="#"
               className="flex flex-col items-center gap-2 font-medium"
             >
-              <div className="flex size-8 items-center justify-center rounded-md">
-                <GalleryVerticalEndIcon className="size-6" />
-              </div>
+              <img 
+                src={logoUrl} 
+                alt="FishFlow Logo" 
+                className="w-24 h-auto object-contain"
+              />
               <span className="sr-only">FishFlow</span>
             </a>
             <h1 className="text-xl font-bold">Bienvenido a FishFlow</h1>
