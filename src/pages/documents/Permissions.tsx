@@ -195,7 +195,7 @@ export default function PermissionsPage() {
                     </div>
                   ) : filtered.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
-                      <ShieldCheck className="size-12 mb-4 text-amber-500/20" />
+                      <img src="/icono_permisos.svg" alt="visor" className="size-16 mx-auto opacity-50" />
                       <p className="font-medium">{search ? "Sin resultados." : "Directorio de permisos sin documentos."}</p>
                       <p className="text-sm mt-1">{search ? "Intenta con otra búsqueda." : "Registra el primer permiso con el botón de arriba."}</p>
                     </div>
@@ -208,7 +208,7 @@ export default function PermissionsPage() {
                           className={`p-4 flex items-start gap-3 cursor-pointer hover:bg-muted/50 transition-colors ${selectedId === perm.id ? "bg-muted/50 border-l-4 border-l-amber-500" : "border-l-4 border-l-transparent"}`}
                         >
                           <div className="p-2 bg-amber-500/10 rounded-lg text-amber-500 shrink-0">
-                            <ShieldCheck className="size-4" />
+                            <img src="/icono_permisos.svg" alt="permiso" className="size-4" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-sm truncate text-foreground">{perm.name}</p>
@@ -258,7 +258,7 @@ export default function PermissionsPage() {
                 <CardContent className="p-0 flex-1 bg-muted/10 relative flex items-center justify-center">
                   {selectedPermission ? (
                     <div className="text-center p-8">
-                      <ShieldCheck className="size-16 mb-4 text-amber-500/20 mx-auto" />
+                      <img src="/icono_permisos.svg" alt="visor" className="size-16 mx-auto opacity-50" />
                       <p className="font-medium text-lg">{selectedPermission.name}</p>
                       <p className="text-sm text-muted-foreground mt-2">{selectedPermission.description}</p>
                       <div className="flex justify-center gap-4 mt-4">

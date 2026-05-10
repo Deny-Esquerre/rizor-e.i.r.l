@@ -192,7 +192,7 @@ export default function InvoicesPage() {
                     </div>
                   ) : filtered.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
-                      <Receipt className="size-12 mb-4 text-emerald-500/20" />
+                      <img src="/icono_facturas.svg" alt="visor" className="size-16 mx-auto opacity-50" />
                       <p className="font-medium">{search ? "Sin resultados." : "No hay facturas registradas."}</p>
                       <p className="text-sm mt-1">{search ? "Intenta con otra búsqueda." : "Registra la primera con el botón de arriba."}</p>
                     </div>
@@ -205,7 +205,7 @@ export default function InvoicesPage() {
                           className={`p-4 flex items-start gap-3 cursor-pointer hover:bg-muted/50 transition-colors ${selectedId === inv.id ? "bg-muted/50 border-l-4 border-l-emerald-500" : "border-l-4 border-l-transparent"}`}
                         >
                           <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500 shrink-0">
-                            <Receipt className="size-4" />
+                            <img src="/icono_facturas.svg" alt="factura" className="size-4" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-sm truncate text-foreground">{inv.client_name}</p>
@@ -253,7 +253,7 @@ export default function InvoicesPage() {
                 <CardContent className="p-0 flex-1 bg-muted/10 relative flex items-center justify-center">
                   {selectedInvoice ? (
                     <div className="text-center">
-                      <Receipt className="size-16 mb-4 text-emerald-500/20 mx-auto" />
+                      <img src="/icono_facturas.svg" alt="visor" className="size-16 mx-auto opacity-50" />
                       <p className="font-medium">Factura N° {selectedInvoice.invoice_number}</p>
                       <p className="text-sm text-muted-foreground mt-1">Cliente: {selectedInvoice.client_name}</p>
                       <p className="text-lg font-bold text-emerald-600 mt-2">S/ {Number(selectedInvoice.amount).toFixed(2)}</p>

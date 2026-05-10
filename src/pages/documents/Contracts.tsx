@@ -26,7 +26,6 @@ import {
   FileSignature, 
   Upload,
   Search,
-  Files,
   Edit,
   Trash2,
   Loader2
@@ -320,8 +319,8 @@ export default function ContractsPage() {
                             selectedId === doc.id ? "bg-muted/50 border-l-4 border-l-primary" : "border-l-4 border-l-transparent"
                           )}
                         >
-                          <div className="p-2 bg-primary/10 rounded-lg text-primary shrink-0">
-                            <Files className="size-4" />
+                          <div className="p-2 shrink-0">
+                            <img src="/icono_contratos.svg" alt="contrato" className="size-4" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-sm truncate text-foreground">{doc.worker_name}</p>
@@ -376,7 +375,7 @@ export default function ContractsPage() {
                     />
                   ) : (
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground p-6 text-center">
-                      <FileSignature className="size-16 mb-4 text-primary/20 opacity-50" />
+                      <img src="/icono_contratos.svg" alt="visor" className="size-16 mx-auto opacity-50" />
                       <p className="font-medium">El visor está listo.</p>
                       <p className="text-sm mt-1">Selecciona un documento del panel izquierdo.</p>
                     </div>

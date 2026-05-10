@@ -189,7 +189,7 @@ export default function OthersPage() {
                     </div>
                   ) : filtered.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
-                      <FolderOpen className="size-12 mb-4 text-muted-foreground/20" />
+                      <img src="/icono_otros.svg" alt="visor" className="size-16 mx-auto opacity-50" />
                       <p className="font-medium">{search ? "Sin resultados." : "No hay otros documentos en este directorio."}</p>
                       <p className="text-sm mt-1">{search ? "Intenta con otra búsqueda." : "Sube un archivo importante con el botón de arriba."}</p>
                     </div>
@@ -202,7 +202,7 @@ export default function OthersPage() {
                           className={`p-4 flex items-start gap-3 cursor-pointer hover:bg-muted/50 transition-colors ${selectedId === doc.id ? "bg-muted/50 border-l-4 border-l-violet-500" : "border-l-4 border-l-transparent"}`}
                         >
                           <div className="p-2 bg-violet-500/10 rounded-lg text-violet-500 shrink-0">
-                            <FolderOpen className="size-4" />
+                            <img src="/icono_otros.svg" alt="otro" className="size-4" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-sm truncate text-foreground">{doc.name}</p>
@@ -257,7 +257,7 @@ export default function OthersPage() {
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center text-muted-foreground p-6 text-center">
-                      <FolderOpen className="size-16 mb-4 text-muted-foreground/20 opacity-50" />
+                      <img src="/icono_otros.svg" alt="visor" className="size-16 mx-auto opacity-50" />
                       <p className="font-medium">El visor está listo.</p>
                       <p className="text-sm mt-1">Selecciona un documento del panel izquierdo.</p>
                     </div>

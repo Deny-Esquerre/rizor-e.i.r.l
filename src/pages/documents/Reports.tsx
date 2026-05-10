@@ -192,7 +192,7 @@ export default function ReportsPage() {
                     </div>
                   ) : filtered.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
-                      <BarChart className="size-12 mb-4 text-blue-500/20" />
+                      <img src="/icono_reportes.svg" alt="visor" className="size-16 mx-auto opacity-50" />
                       <p className="font-medium">{search ? "Sin resultados." : "No hay reportes generados."}</p>
                       <p className="text-sm mt-1">{search ? "Intenta con otra búsqueda." : "Genera el primer reporte con el botón de arriba."}</p>
                     </div>
@@ -205,7 +205,7 @@ export default function ReportsPage() {
                           className={`p-4 flex items-start gap-3 cursor-pointer hover:bg-muted/50 transition-colors ${selectedId === report.id ? "bg-muted/50 border-l-4 border-l-blue-500" : "border-l-4 border-l-transparent"}`}
                         >
                           <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500 shrink-0">
-                            <BarChart className="size-4" />
+                            <img src="/icono_reportes.svg" alt="reporte" className="size-4" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-sm truncate text-foreground">{report.title}</p>
@@ -253,7 +253,7 @@ export default function ReportsPage() {
                 <CardContent className="p-0 flex-1 bg-muted/10 relative flex items-center justify-center">
                   {selectedReport ? (
                     <div className="text-center p-8">
-                      <BarChart className="size-16 mb-4 text-blue-500/20 mx-auto" />
+                      <img src="/icono_reportes.svg" alt="visor" className="size-16 mx-auto opacity-50" />
                       <p className="font-medium text-lg">{selectedReport.title}</p>
                       <p className="text-sm text-muted-foreground mt-2">{selectedReport.description}</p>
                       <p className="text-xs text-muted-foreground mt-4">Fecha: {selectedReport.report_date}</p>
