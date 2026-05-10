@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { CustomSidebar } from "@/components/custom-sidebar"
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
@@ -64,9 +64,7 @@ export default function PermissionsPage() {
     description: ""
   })
 
-  useState(() => {
-    fetchPermissions()
-  })
+  useEffect(() => { fetchPermissions() }, [])
 
   const fetchPermissions = async () => {
     setLoading(true)
