@@ -79,7 +79,7 @@ export function LoginForm({
               <img 
                 src={logoUrl} 
                 alt="FishFlow Logo" 
-                className="w-24 h-auto object-contain"
+                className="w-32 h-auto object-contain"
               />
               <span className="sr-only">FishFlow</span>
             </a>
