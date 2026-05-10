@@ -1,6 +1,6 @@
-# React + TypeScript + Vite + shadcn/ui
+# FishFlow ERP - RIZOR E.I.R.L.
 
-This is a template for a new Vite project with React, TypeScript, and shadcn/ui.
+Sistema de gestión empresarial para la industria pesquera.
 
 ## Adding components
 
