@@ -3,7 +3,7 @@ import { IconCircleCheck, IconUserPlus, IconInfoCircle, IconLoader2 } from "@tab
 import { supabase, isSupabaseConfigured } from "@/lib/supabase"
 
 interface Activity {
-  id: number
+  id: string
   text: string
   time: string
   type: "sale" | "person"
