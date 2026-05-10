@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator"
 import {
   Breadcrumb,
   BreadcrumbItem,
+  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
@@ -14,8 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { 
   FolderOpen, 
   Upload,
-  Search,
-  Files
+  Search
 } from "lucide-react"
 
 export default function OthersPage() {
@@ -30,15 +30,15 @@ export default function OthersPage() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbPage className="font-bold flex items-center gap-2 text-muted-foreground">
-                    <Files className="size-4" /> Documentos
-                  </BreadcrumbPage>
+                  <BreadcrumbLink href="/dashboard" className="text-muted-foreground">Centro de Control</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage className="font-black text-foreground">
-                    Otros Documentos
-                  </BreadcrumbPage>
+                  <BreadcrumbPage className="text-muted-foreground">Gestión de Documentos</BreadcrumbPage>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Otros Documentos</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
