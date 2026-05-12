@@ -110,7 +110,6 @@ export default function PersonnelPage() {
   })
   const [editingId, setEditingId] = React.useState<string | null>(null)
   const [viewingId, setViewingId] = React.useState<string | null>(null)
-  const [viewingId, setViewingId] = React.useState<string | null>(null)
 
   // Cálculos de deducciones
   const healthAmount = (formData.monthly_salary * formData.health_deduction_pct) / 100
