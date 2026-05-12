@@ -162,7 +162,7 @@ export function CustomSidebar() {
       localStorage.removeItem("user_email")
       localStorage.removeItem("user_name")
       toast.success("Sesión cerrada correctamente")
-      navigate("/login")
+      window.location.href = "https://landingpage-rizoeirl.vercel.app/"
     } catch (error) {
       toast.error("Error al cerrar sesión")
     }
