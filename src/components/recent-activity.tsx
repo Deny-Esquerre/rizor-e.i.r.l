@@ -295,8 +295,9 @@ export function RecentActivity() {
               Exportar Excel
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-44 rounded-xl shadow-2xl p-2 border-border/40">
-            <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground/50 px-2 py-1">Seleccionar período</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-2xl p-2 border-border/40">
+            <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground/50 px-2 py-1">Gestión Financiera</DropdownMenuLabel>
+            <DropdownMenuLabel className="text-[9px] font-medium text-muted-foreground/40 px-2 pb-1 -mt-1">Seleccionar período</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleExport("excel", "week")} className="rounded-lg cursor-pointer py-2">
               <span className="font-semibold text-sm">Esta Semana</span>
