@@ -86,6 +86,7 @@ export default function InventoryPage() {
   const [filterArea, setFilterArea] = React.useState("Todas")
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
   const [isAddingNewArea, setIsAddingNewArea] = React.useState(false)
+  const [isAddingNewType, setIsAddingNewType] = React.useState(false)
   
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false)
   const [itemToDeleteId, setItemToDeleteId] = React.useState<number | null>(null)
@@ -170,6 +171,7 @@ export default function InventoryPage() {
     
     setFormData({ name: "", type: "Pescado", area: "Almacén A", price: 0, quantity: 0 })
     setIsAddingNewArea(false)
+    setIsAddingNewType(false)
   }
 
   const handleDelete = (id: number) => {
@@ -211,6 +213,7 @@ export default function InventoryPage() {
     setEditingId(null)
     setFormData({ name: "", type: "Pescado", area: "Almacén A", price: 0, quantity: 0 })
     setIsAddingNewArea(false)
+    setIsAddingNewType(false)
   }
 
   const filteredItems = items.filter(item => {
@@ -276,15 +279,27 @@ export default function InventoryPage() {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="grid gap-2">
                         <Label htmlFor="type">Tipo</Label>
-                        <Select onValueChange={(v) => handleSelectChange("type", v)} value={formData.type}>
+                        <Select 
+                          onValueChange={(v) => {
+                            if (v === "new") {
+                              setIsAddingNewType(true)
+                              handleSelectChange("type", "")
+                            } else {
+                              setIsAddingNewType(false)
+                              handleSelectChange("type", v)
+                            }
+                          }} 
+                          value={isAddingNewType ? "new" : formData.type}
+                        >
                           <SelectTrigger id="type" className="rounded-xl">
                             <SelectValue placeholder="Seleccionar" />
                           </SelectTrigger>
                           <SelectContent className="rounded-xl">
-                            <SelectItem value="Pescado">Pescado</SelectItem>
-                            <SelectItem value="Marisco">Marisco</SelectItem>
-                            <SelectItem value="Insumo">Insumo</SelectItem>
-                            <SelectItem value="Otro">Otro</SelectItem>
+                            {Array.from(new Set([...items.map(i => i.type), "Pescado", "Marisco", "Insumo"])).filter(Boolean).map(type => (
+                              <SelectItem key={type} value={type}>{type}</SelectItem>
+                            ))}
+                            <SelectSeparator />
+                            <SelectItem value="new" className="text-primary font-bold focus:text-primary focus:bg-primary/10 cursor-pointer">+ Nuevo Tipo...</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -316,6 +331,19 @@ export default function InventoryPage() {
                       </div>
                     </div>
                     
+                    {isAddingNewType && (
+                      <div className="grid gap-2 animate-in fade-in slide-in-from-top-1">
+                        <Label htmlFor="newType">Nombre del Nuevo Tipo</Label>
+                        <Input 
+                          id="newType" 
+                          placeholder="Ej. Congelados, Conservas..." 
+                          className="rounded-xl border-primary/30 focus-visible:ring-primary/20"
+                          value={formData.type}
+                          onChange={(e) => handleSelectChange("type", e.target.value)}
+                        />
+                      </div>
+                    )}
+
                     {isAddingNewArea && (
                       <div className="grid gap-2 animate-in fade-in slide-in-from-top-1">
                         <Label htmlFor="newArea">Nombre de la Nueva Área</Label>
@@ -394,10 +422,9 @@ export default function InventoryPage() {
                   <DropdownMenuSubContent className="rounded-xl p-2 shadow-2xl border-border/40">
                     <DropdownMenuRadioGroup value={filterType} onValueChange={setFilterType}>
                       <DropdownMenuRadioItem value="Todos" className="rounded-lg cursor-pointer">Todos</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Pescado" className="rounded-lg cursor-pointer">Pescado</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Marisco" className="rounded-lg cursor-pointer">Marisco</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Insumo" className="rounded-lg cursor-pointer">Insumo</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="Otro" className="rounded-lg cursor-pointer">Otro</DropdownMenuRadioItem>
+                      {Array.from(new Set(items.map(i => i.type))).filter(Boolean).map(type => (
+                        <DropdownMenuRadioItem key={type} value={type} className="rounded-lg cursor-pointer">{type}</DropdownMenuRadioItem>
+                      ))}
                     </DropdownMenuRadioGroup>
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
