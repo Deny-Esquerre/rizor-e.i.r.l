@@ -56,6 +56,7 @@ import {
   SelectSeparator
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
@@ -111,7 +112,9 @@ export default function FinancePage() {
   const [localCategories, setLocalCategories] = React.useState<string[]>(DEFAULT_CATEGORIES)
   
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false)
+  const [isBatchDeleteDialogOpen, setIsBatchDeleteDialogOpen] = React.useState(false)
   const [itemToDeleteId, setItemToDeleteId] = React.useState<string | null>(null)
+  const [selectedIds, setSelectedIds] = React.useState<string[]>([])
 
   const [formData, setFormData] = React.useState({
     date: new Date(),
@@ -276,6 +279,49 @@ export default function FinancePage() {
     setItemToDeleteId(null)
   }
 
+  const handleToggleSelectAll = () => {
+    if (selectedIds.length === filteredItems.length && filteredItems.length > 0) {
+      setSelectedIds([])
+    } else {
+      setSelectedIds(filteredItems.map(m => m.id))
+    }
+  }
+
+  const handleToggleSelect = (id: string) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    )
+  }
+
+  const handleBatchDelete = () => {
+    if (selectedIds.length === 0) return
+    setIsBatchDeleteDialogOpen(true)
+  }
+
+  const confirmBatchDelete = async () => {
+    if (selectedIds.length === 0) return
+    setLoading(true)
+    try {
+      const { error } = await supabase
+        .from("transactions")
+        .delete()
+        .in("id", selectedIds)
+
+      if (error) {
+        toast.error("Error al eliminar los registros seleccionados")
+      } else {
+        toast.success(`${selectedIds.length} registros eliminados correctamente`)
+        setSelectedIds([])
+        fetchTransactions()
+      }
+    } catch {
+      toast.error("Ocurrió un error inesperado")
+    } finally {
+      setLoading(false)
+      setIsBatchDeleteDialogOpen(false)
+    }
+  }
+
   const exportToExcel = () => {
     try {
       const dataToExport = filteredItems.map(item => ({
@@ -373,6 +419,16 @@ export default function FinancePage() {
             </div>
             
             <div className="flex items-center gap-2">
+              {selectedIds.length > 0 && (
+                <Button 
+                  variant="destructive" 
+                  onClick={handleBatchDelete}
+                  className="animate-in fade-in zoom-in duration-200 shadow-md bg-rose-600 hover:bg-rose-700 rounded-xl"
+                >
+                  <Trash2 className="mr-2 size-4" /> 
+                  Eliminar ({selectedIds.length})
+                </Button>
+              )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="rounded-xl shadow-sm border-border/60">
@@ -631,6 +687,13 @@ export default function FinancePage() {
             <Table>
               <TableHeader className="bg-muted/50">
                 <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-[40px] pl-6 pr-4">
+                    <Checkbox 
+                      checked={filteredItems.length > 0 && selectedIds.length === filteredItems.length}
+                      onCheckedChange={handleToggleSelectAll}
+                      aria-label="Seleccionar todo"
+                    />
+                  </TableHead>
                   <TableHead className="w-[15%] font-bold text-foreground py-3">Fecha</TableHead>
                   <TableHead className="w-[45%] font-bold text-foreground py-3">Detalle / Categoría</TableHead>
                   <TableHead className="w-[20%] text-right font-bold text-foreground py-3">Monto</TableHead>
@@ -641,12 +704,19 @@ export default function FinancePage() {
                 {loading ? (
                   Array.from({ length: 8 }).map((_, i) => (
                     <TableRow key={i}>
-                      <TableCell colSpan={4}><div className="h-10 w-full animate-pulse rounded bg-muted/40" /></TableCell>
+                      <TableCell colSpan={5}><div className="h-10 w-full animate-pulse rounded bg-muted/40" /></TableCell>
                     </TableRow>
                   ))
                 ) : filteredItems.length > 0 ? (
                   filteredItems.map((item) => (
                     <TableRow key={item.id} className="group hover:bg-muted/30 transition-colors">
+                      <TableCell className="pl-6 pr-4">
+                        <Checkbox 
+                          checked={selectedIds.includes(item.id)}
+                          onCheckedChange={() => handleToggleSelect(item.id)}
+                          aria-label={`Seleccionar ${item.description}`}
+                        />
+                      </TableCell>
                       <TableCell className="py-3">
                         <span className="text-xs font-medium text-muted-foreground">{item.date}</span>
                       </TableCell>
@@ -694,7 +764,7 @@ export default function FinancePage() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-40 text-center text-muted-foreground text-xs italic">
+                    <TableCell colSpan={5} className="h-40 text-center text-muted-foreground text-xs italic">
                       No se encontraron movimientos financieros.
                     </TableCell>
                   </TableRow>
@@ -702,6 +772,37 @@ export default function FinancePage() {
               </TableBody>
             </Table>
           </div>
+
+          {/* Diálogo de Confirmación de Eliminación Masiva */}
+          <Dialog open={isBatchDeleteDialogOpen} onOpenChange={setIsBatchDeleteDialogOpen}>
+            <DialogContent className="rounded-3xl max-w-sm border-border/60 shadow-2xl">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-rose-600">
+                  <AlertTriangle className="size-5" /> 
+                  ¿Eliminar Registros Seleccionados?
+                </DialogTitle>
+                <DialogDescription className="py-2 text-foreground/70">
+                  Estás por eliminar <span className="font-bold text-rose-600">{selectedIds.length} registros</span> financieros. Esta acción es irreversible.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="flex-col sm:flex-row gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsBatchDeleteDialogOpen(false)}
+                  className="rounded-xl font-bold w-full sm:w-auto"
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  onClick={confirmBatchDelete}
+                  className="rounded-xl font-bold w-full sm:w-auto bg-rose-600 hover:bg-rose-700"
+                >
+                  Sí, Eliminar {selectedIds.length} Registros
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
           {/* Diálogo de Confirmación de Eliminación */}
           <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

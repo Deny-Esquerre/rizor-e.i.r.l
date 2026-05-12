@@ -26,6 +26,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Table,
   TableBody,
@@ -89,7 +90,9 @@ export default function InventoryPage() {
   const [isAddingNewType, setIsAddingNewType] = React.useState(false)
   
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false)
+  const [isBatchDeleteDialogOpen, setIsBatchDeleteDialogOpen] = React.useState(false)
   const [itemToDeleteId, setItemToDeleteId] = React.useState<number | null>(null)
+  const [selectedIds, setSelectedIds] = React.useState<number[]>([])
 
   // Form state
   const [formData, setFormData] = React.useState({
@@ -209,6 +212,49 @@ export default function InventoryPage() {
     setIsDialogOpen(true)
   }
 
+  const handleToggleSelectAll = () => {
+    if (selectedIds.length === filteredItems.length && filteredItems.length > 0) {
+      setSelectedIds([])
+    } else {
+      setSelectedIds(filteredItems.map(m => m.id))
+    }
+  }
+
+  const handleToggleSelect = (id: number) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    )
+  }
+
+  const handleBatchDelete = () => {
+    if (selectedIds.length === 0) return
+    setIsBatchDeleteDialogOpen(true)
+  }
+
+  const confirmBatchDelete = async () => {
+    if (selectedIds.length === 0) return
+    setLoading(true)
+    try {
+      const { error } = await supabase
+        .from("inventory")
+        .delete()
+        .in("id", selectedIds)
+
+      if (error) {
+        toast.error("Error al eliminar los productos seleccionados")
+      } else {
+        toast.success(`${selectedIds.length} productos eliminados correctamente`)
+        setSelectedIds([])
+        fetchItems()
+      }
+    } catch {
+      toast.error("Ocurrió un error inesperado")
+    } finally {
+      setLoading(false)
+      setIsBatchDeleteDialogOpen(false)
+    }
+  }
+
   const resetForm = () => {
     setEditingId(null)
     setFormData({ name: "", type: "Pescado", area: "Almacén A", price: 0, quantity: 0 })
@@ -252,7 +298,18 @@ export default function InventoryPage() {
               <p className="text-muted-foreground">Gestiona el stock, precios y ubicación de tus productos.</p>
             </div>
             
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <div className="flex items-center gap-2">
+              {selectedIds.length > 0 && (
+                <Button 
+                  variant="destructive" 
+                  onClick={handleBatchDelete}
+                  className="animate-in fade-in zoom-in duration-200 shadow-md bg-rose-600 hover:bg-rose-700 rounded-xl"
+                >
+                  <Trash2 className="mr-2 size-4" /> 
+                  Eliminar ({selectedIds.length})
+                </Button>
+              )}
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button onClick={resetForm} className="bg-primary hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg">
                   <Plus className="mr-2 size-4" /> Registrar Producto
@@ -463,6 +520,13 @@ export default function InventoryPage() {
             <Table>
               <TableHeader className="bg-muted/50">
                 <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-[40px] pl-6 pr-4">
+                    <Checkbox 
+                      checked={filteredItems.length > 0 && selectedIds.length === filteredItems.length}
+                      onCheckedChange={handleToggleSelectAll}
+                      aria-label="Seleccionar todo"
+                    />
+                  </TableHead>
                   <TableHead className="w-[40%] min-w-[200px] font-bold text-foreground py-3">Producto / SKU</TableHead>
                   <TableHead className="w-[15%] font-bold text-foreground py-3">Tipo</TableHead>
                   <TableHead className="w-[15%] font-bold text-foreground py-3">Ubicación</TableHead>
@@ -475,12 +539,19 @@ export default function InventoryPage() {
                 {loading ? (
                   Array.from({ length: 8 }).map((_, i) => (
                     <TableRow key={i}>
-                      <TableCell colSpan={6}><div className="h-6 w-full animate-pulse rounded bg-muted/40" /></TableCell>
+                      <TableCell colSpan={7}><div className="h-6 w-full animate-pulse rounded bg-muted/40" /></TableCell>
                     </TableRow>
                   ))
                 ) : filteredItems.length > 0 ? (
                   filteredItems.map((item) => (
                     <TableRow key={item.id} className="group hover:bg-muted/30 transition-colors">
+                      <TableCell className="pl-6 pr-4">
+                        <Checkbox 
+                          checked={selectedIds.includes(item.id)}
+                          onCheckedChange={() => handleToggleSelect(item.id)}
+                          aria-label={`Seleccionar ${item.name}`}
+                        />
+                      </TableCell>
                       <TableCell className="py-3">
                         <div className="flex flex-col gap-0.5">
                           <span className="font-medium text-sm text-foreground">{item.name}</span>
@@ -538,7 +609,7 @@ export default function InventoryPage() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="h-40 text-center text-muted-foreground text-xs italic">
+                    <TableCell colSpan={7} className="h-40 text-center text-muted-foreground text-xs italic">
                       No se encontraron registros de inventario.
                     </TableCell>
                   </TableRow>
@@ -609,6 +680,37 @@ export default function InventoryPage() {
               <DialogFooter>
                 <Button variant="outline" onClick={() => setPreviewItem(null)} className="rounded-xl font-bold w-full">
                   Cerrar Vista
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Diálogo de Confirmación de Eliminación Masiva */}
+          <Dialog open={isBatchDeleteDialogOpen} onOpenChange={setIsBatchDeleteDialogOpen}>
+            <DialogContent className="rounded-3xl max-w-sm border-border/60 shadow-2xl">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-rose-600">
+                  <AlertTriangle className="size-5" /> 
+                  ¿Eliminar Productos Seleccionados?
+                </DialogTitle>
+                <DialogDescription className="py-2 text-foreground/70">
+                  Estás por eliminar <span className="font-bold text-rose-600">{selectedIds.length} productos</span> del inventario. Esta acción es irreversible.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="flex-col sm:flex-row gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsBatchDeleteDialogOpen(false)}
+                  className="rounded-xl font-bold w-full sm:w-auto"
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  onClick={confirmBatchDelete}
+                  className="rounded-xl font-bold w-full sm:w-auto bg-rose-600 hover:bg-rose-700"
+                >
+                  Sí, Eliminar {selectedIds.length} Productos
                 </Button>
               </DialogFooter>
             </DialogContent>
