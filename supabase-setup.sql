@@ -48,6 +48,11 @@ CREATE TABLE IF NOT EXISTS permissions (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- Si la tabla ya existe, agregar las columnas nuevas:
+ALTER TABLE IF EXISTS permissions
+  ADD COLUMN IF NOT EXISTS worker_id UUID DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS worker_name TEXT DEFAULT '';
+
 -- 4. TABLA: reports
 CREATE TABLE IF NOT EXISTS reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

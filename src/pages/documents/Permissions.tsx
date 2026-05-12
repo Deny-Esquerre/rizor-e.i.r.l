@@ -125,9 +125,8 @@ export default function PermissionsPage() {
   const getWorkerName = (w: Worker) => `${w.name} ${w.surname}`
 
   const filtered = permissions.filter(p =>
-    p.worker_name.toLowerCase().includes(search.toLowerCase()) ||
-    p.type.toLowerCase().includes(search.toLowerCase()) ||
-    p.name.toLowerCase().includes(search.toLowerCase())
+    (p.worker_name || p.name || "").toLowerCase().includes(search.toLowerCase()) ||
+    p.type.toLowerCase().includes(search.toLowerCase())
   )
 
   const selectedPermission = permissions.find(p => p.id === selectedId)
@@ -405,7 +404,7 @@ export default function PermissionsPage() {
                           )}
                         >
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm truncate text-foreground">{perm.worker_name}</p>
+                            <p className="font-semibold text-sm truncate text-foreground">{perm.worker_name || perm.name}</p>
                             <p className="text-xs text-muted-foreground mt-0.5">{perm.type} • {perm.issue_date}</p>
                             <p className={cn("text-xs font-medium mt-0.5", perm.status === "Vigente" ? "text-emerald-600" : "text-rose-600")}>
                               {perm.status}
@@ -446,7 +445,7 @@ export default function PermissionsPage() {
                   <CardTitle className="text-lg">Visualización del Documento</CardTitle>
                   {selectedPermission ? (
                     <CardDescription>
-                      Permiso de <span className="font-medium text-foreground">{selectedPermission.worker_name}</span> • {selectedPermission.type}
+                        Permiso de <span className="font-medium text-foreground">{selectedPermission.worker_name || selectedPermission.name}</span> • {selectedPermission.type}
                     </CardDescription>
                   ) : (
                     <CardDescription>Selecciona un permiso para previsualizarlo aquí.</CardDescription>
@@ -462,7 +461,7 @@ export default function PermissionsPage() {
                   ) : selectedPermission ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground p-6 text-center">
                       <img src="/icono_permisos.svg" alt="visor" className="size-36 mx-auto opacity-50" />
-                      <p className="font-medium text-lg">{selectedPermission.worker_name}</p>
+                      <p className="font-medium text-lg">{selectedPermission.worker_name || selectedPermission.name}</p>
                       <p className="text-sm text-muted-foreground mt-1">{selectedPermission.type}</p>
                       <p className="text-sm text-muted-foreground mt-2">{selectedPermission.description}</p>
                       <div className="flex justify-center gap-4 mt-4">
@@ -611,7 +610,7 @@ export default function PermissionsPage() {
             </DialogTitle>
             <DialogDescription className="pt-2">
               ¿Estás seguro de que deseas eliminar el permiso de{" "}
-              <span className="font-semibold text-foreground">{deleteTarget?.worker_name}</span>?{" "}
+              <span className="font-semibold text-foreground">{deleteTarget?.worker_name || deleteTarget?.name}</span>?{" "}
               <span className="text-destructive font-medium">Esta acción no se puede deshacer.</span>
             </DialogDescription>
           </DialogHeader>
