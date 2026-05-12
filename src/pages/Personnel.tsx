@@ -115,9 +115,8 @@ export default function PersonnelPage() {
 
   // Cálculos de deducciones
   const healthAmount = (formData.monthly_salary * formData.health_deduction_pct) / 100
-  const salaryAfterHealth = formData.monthly_salary - healthAmount
   const pensionAmount = (formData.monthly_salary * formData.pension_deduction_pct) / 100
-  const totalNetSalary = formData.monthly_salary - healthAmount - pensionAmount
+  const totalNetSalary = formData.monthly_salary - pensionAmount
 
   React.useEffect(() => {
     fetchMembers()
@@ -548,19 +547,19 @@ export default function PersonnelPage() {
                       </div>
                     </div>
 
-                    {/* Descuentos de Ley */}
+                    {/* Aportes e indicadores */}
                     <div className="space-y-4 p-4 mt-2 bg-muted/30 rounded-2xl border border-border/50">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-1.5">
-                          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Descuento Salud</Label>
+                          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Aporte del empleado</Label>
                           <div className="flex items-center gap-2 px-3 py-2 bg-background/50 border border-border/60 rounded-xl h-10 shadow-sm">
-                            <span className="text-sm font-black text-rose-600">9%</span>
+                            <span className="text-sm font-black text-emerald-600">9%</span>
                             <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter">(EsSalud)</span>
                           </div>
                         </div>
                         <div className="flex flex-col justify-end pb-1 text-right">
-                          <span className="text-[9px] font-black text-muted-foreground/60 uppercase leading-none mb-1">Monto - Salud</span>
-                          <span className="text-sm font-bold text-foreground">S/ {salaryAfterHealth.toFixed(2)}</span>
+                          <span className="text-[9px] font-black text-emerald-600/70 uppercase leading-none mb-1">Monto Aporte</span>
+                          <span className="text-sm font-bold text-emerald-600">S/ {healthAmount.toFixed(2)}</span>
                         </div>
                       </div>
 
@@ -728,7 +727,7 @@ export default function PersonnelPage() {
                       </TableCell>
                       <TableCell className="text-right py-5 px-4">
                         <div className="flex flex-col items-end">
-                          <span className="text-sm font-black text-foreground">S/ {(member.monthly_salary * (1 - (member.health_deduction_pct + member.pension_deduction_pct) / 100)).toFixed(2)}</span>
+                          <span className="text-sm font-black text-foreground">S/ {(member.monthly_salary * (1 - (member.pension_deduction_pct) / 100)).toFixed(2)}</span>
                           <span className="text-[9px] font-bold text-muted-foreground/60 uppercase">Neto (Líquido)</span>
                         </div>
                       </TableCell>
