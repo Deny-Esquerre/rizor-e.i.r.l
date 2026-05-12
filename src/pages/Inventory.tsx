@@ -104,6 +104,8 @@ export default function InventoryPage() {
   })
   const [editingId, setEditingId] = React.useState<number | null>(null)
   const [previewItem, setPreviewItem] = React.useState<InventoryItem | null>(null)
+  const [rowsPerPage, setRowsPerPage] = React.useState<number | null>(10)
+  const [currentPage, setCurrentPage] = React.useState(1)
 
   React.useEffect(() => {
     fetchItems()
@@ -268,6 +270,11 @@ export default function InventoryPage() {
     const matchesArea = filterArea === "Todas" || item.area === filterArea
     return matchesSearch && matchesType && matchesArea
   })
+
+  const totalPages = rowsPerPage ? Math.ceil(filteredItems.length / rowsPerPage) : 1
+  const paginatedItems = rowsPerPage
+    ? filteredItems.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
+    : filteredItems
 
   return (
     <SidebarProvider>
@@ -544,7 +551,7 @@ export default function InventoryPage() {
                     </TableRow>
                   ))
                 ) : filteredItems.length > 0 ? (
-                  filteredItems.map((item) => (
+                  paginatedItems.map((item) => (
                     <TableRow key={item.id} className="group hover:bg-muted/30 transition-colors">
                       <TableCell className="pl-8 pr-6">
                         <Checkbox 
@@ -617,6 +624,54 @@ export default function InventoryPage() {
                 )}
               </TableBody>
             </Table>
+            <div className="flex items-center justify-between px-6 py-3 border-t border-border/40">
+              <span className="text-xs text-muted-foreground">
+                Mostrando {rowsPerPage ? `${paginatedItems.length} de ` : ''}{filteredItems.length} registro{filteredItems.length !== 1 ? 's' : ''}
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Filas por página</span>
+                {[5, 10, 20].map(n => (
+                  <button
+                    key={n}
+                    onClick={() => { setRowsPerPage(n); setCurrentPage(1) }}
+                    className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors ${
+                      rowsPerPage === n ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted/50'
+                    }`}
+                  >
+                    {n}
+                  </button>
+                ))}
+                <button
+                  onClick={() => { setRowsPerPage(null); setCurrentPage(1) }}
+                  className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors ${
+                    rowsPerPage === null ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted/50'
+                  }`}
+                >
+                  Todo
+                </button>
+                {rowsPerPage && (
+                  <div className="flex items-center gap-1 ml-2 pl-2 border-l border-border/40">
+                    <button
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="px-2 py-1 text-xs font-bold rounded-lg transition-colors text-muted-foreground hover:bg-muted/50 disabled:opacity-30 disabled:pointer-events-none"
+                    >
+                      ‹
+                    </button>
+                    <span className="text-xs font-bold text-foreground min-w-[40px] text-center tabular-nums">
+                      {currentPage} / {totalPages}
+                    </span>
+                    <button
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className="px-2 py-1 text-xs font-bold rounded-lg transition-colors text-muted-foreground hover:bg-muted/50 disabled:opacity-30 disabled:pointer-events-none"
+                    >
+                      ›
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Diálogo de Previsualización */}
