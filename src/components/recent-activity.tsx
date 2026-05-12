@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import * as XLSX from "xlsx"
 import jsPDF from "jspdf"
-import "jspdf-autotable"
+import autoTable from "jspdf-autotable"
 import { format } from "date-fns"
 
 interface Activity {
@@ -126,7 +126,7 @@ function exportToPDF(transactions: Transaction[], period: Period) {
       item.status,
     ])
 
-    ;(doc as any).autoTable({
+    autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
       startY: 40,

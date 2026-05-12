@@ -84,7 +84,7 @@ import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import * as XLSX from "xlsx"
 import jsPDF from "jspdf"
-import "jspdf-autotable"
+import autoTable from "jspdf-autotable"
 
 interface Transaction {
   id: string
@@ -315,7 +315,7 @@ export default function FinancePage() {
         item.status
       ])
 
-      ;(doc as any).autoTable({
+      autoTable(doc, {
         head: [tableColumn],
         body: tableRows,
         startY: 40,
