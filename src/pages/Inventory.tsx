@@ -445,6 +445,7 @@ export default function InventoryPage() {
               </DialogContent>
             </Dialog>
           </div>
+          </div>
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="relative flex-1">
