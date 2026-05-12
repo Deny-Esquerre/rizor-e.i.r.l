@@ -1,6 +1,5 @@
 import * as React from "react"
 import { 
-  Users, 
   Plus, 
   Search, 
   Pencil, 
@@ -9,7 +8,6 @@ import {
   Eye,
   AlertTriangle,
   Phone,
-  CreditCard,
   MapPin
 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
@@ -111,6 +109,7 @@ export default function PersonnelPage() {
     pension_deduction_pct: 13 // ONP por defecto
   })
   const [editingId, setEditingId] = React.useState<string | null>(null)
+  const [viewingId, setViewingId] = React.useState<string | null>(null)
   const [previewMember, setPreviewMember] = React.useState<PersonnelMember | null>(null)
 
   // Cálculos de deducciones
@@ -185,6 +184,7 @@ export default function PersonnelPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (viewingId) return
     
     // Validaciones finales
     if (formData.dni.length !== 8) {
@@ -338,8 +338,27 @@ export default function PersonnelPage() {
     setIsDialogOpen(true)
   }
 
+  const startView = (member: PersonnelMember) => {
+    setViewingId(member.id)
+    setEditingId(null)
+    setFormData({
+      first_name: member.first_name,
+      last_name: member.last_name,
+      dni: member.dni,
+      phone: member.phone,
+      address: member.address,
+      area: member.area,
+      monthly_salary: member.monthly_salary,
+      health_deduction_pct: member.health_deduction_pct || 9,
+      pension_type: member.pension_type || "ONP",
+      pension_deduction_pct: member.pension_deduction_pct || 13
+    })
+    setIsDialogOpen(true)
+  }
+
   const resetForm = () => {
     setEditingId(null)
+    setViewingId(null)
     setFormData({ 
       first_name: "", 
       last_name: "", 
@@ -403,7 +422,7 @@ export default function PersonnelPage() {
                 </Button>
               )}
               
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) setViewingId(null) }}>
                 <DialogTrigger asChild>
                   <Button onClick={resetForm} className="bg-primary hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg rounded-xl">
                     <Plus className="mr-2 size-4" /> Registrar Personal
@@ -412,9 +431,9 @@ export default function PersonnelPage() {
               <DialogContent className="sm:max-w-[450px]">
                 <form onSubmit={handleSubmit}>
                   <DialogHeader>
-                    <DialogTitle>{editingId ? 'Editar Personal' : 'Nuevo Registro de Personal'}</DialogTitle>
+                    <DialogTitle>{viewingId ? 'Ficha del Colaborador' : editingId ? 'Editar Personal' : 'Nuevo Registro de Personal'}</DialogTitle>
                     <DialogDescription>
-                      Ingresa los datos detallados del colaborador.
+                      {viewingId ? 'Visualización completa de los datos del colaborador (solo lectura).' : 'Ingresa los datos detallados del colaborador.'}
                     </DialogDescription>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
@@ -426,6 +445,7 @@ export default function PersonnelPage() {
                           placeholder="Ej. Juan Carlos" 
                           value={formData.first_name}
                           onChange={handleInputChange}
+                          disabled={!!viewingId}
                           className="rounded-xl"
                         />
                       </div>
@@ -436,6 +456,7 @@ export default function PersonnelPage() {
                           placeholder="Ej. Pérez Gómez" 
                           value={formData.last_name}
                           onChange={handleInputChange}
+                          disabled={!!viewingId}
                           className="rounded-xl"
                         />
                       </div>
@@ -449,6 +470,7 @@ export default function PersonnelPage() {
                           placeholder="Ej. 70451234" 
                           value={formData.dni}
                           onChange={handleInputChange}
+                          disabled={!!viewingId}
                           className="rounded-xl"
                         />
                       </div>
@@ -459,6 +481,7 @@ export default function PersonnelPage() {
                           placeholder="Ej. 912345678" 
                           value={formData.phone}
                           onChange={handleInputChange}
+                          disabled={!!viewingId}
                           className="rounded-xl"
                         />
                       </div>
@@ -466,13 +489,14 @@ export default function PersonnelPage() {
 
                     <div className="grid gap-2">
                       <Label htmlFor="address">Dirección</Label>
-                      <Input 
-                        id="address" 
-                        placeholder="Ej. Av. Las Magnolias 123..." 
-                        value={formData.address}
-                        onChange={handleInputChange}
-                        className="rounded-xl"
-                      />
+                        <Input 
+                          id="address" 
+                          placeholder="Ej. Av. Las Magnolias 123..." 
+                          value={formData.address}
+                          onChange={handleInputChange}
+                          disabled={!!viewingId}
+                          className="rounded-xl"
+                        />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -489,6 +513,7 @@ export default function PersonnelPage() {
                             }
                           }} 
                           value={isAddingNewArea ? "new" : formData.area}
+                          disabled={!!viewingId}
                         >
                           <SelectTrigger id="area" className="rounded-xl">
                             <SelectValue placeholder="Seleccionar" />
@@ -511,6 +536,7 @@ export default function PersonnelPage() {
                           placeholder="0.00" 
                           value={formData.monthly_salary}
                           onChange={handleInputChange}
+                          disabled={!!viewingId}
                           className="rounded-xl"
                         />
                       </div>
@@ -538,6 +564,7 @@ export default function PersonnelPage() {
                           <Select 
                             onValueChange={(v) => handleSelectChange("pension_type", v)} 
                             value={formData.pension_type}
+                            disabled={!!viewingId}
                           >
                             <SelectTrigger id="pension_type" className="rounded-xl h-10 bg-background/50 shadow-sm">
                               <SelectValue placeholder="Seleccionar" />
@@ -579,12 +606,20 @@ export default function PersonnelPage() {
                   </div>
 
                     <DialogFooter>
-                      <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                        Cancelar
-                      </Button>
-                      <Button type="submit">
-                        {editingId ? 'Guardar Cambios' : 'Registrar Colaborador'}
-                      </Button>
+                      {viewingId ? (
+                        <Button type="button" variant="secondary" onClick={() => { setIsDialogOpen(false); setViewingId(null) }} className="rounded-xl font-bold w-full">
+                          Cerrar
+                        </Button>
+                      ) : (
+                        <>
+                          <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                            Cancelar
+                          </Button>
+                          <Button type="submit">
+                            {editingId ? 'Guardar Cambios' : 'Registrar Colaborador'}
+                          </Button>
+                        </>
+                      )}
                     </DialogFooter>
                   </form>
                 </DialogContent>
@@ -697,7 +732,7 @@ export default function PersonnelPage() {
                             variant="ghost" 
                             size="icon-xs" 
                             className="hover:text-primary transition-colors h-7 w-7 rounded-lg" 
-                            onClick={() => setPreviewMember(member)}
+                            onClick={() => startView(member)}
                           >
                             <Eye className="size-3.5" />
                           </Button>
@@ -731,62 +766,6 @@ export default function PersonnelPage() {
               </TableBody>
             </Table>
           </div>
-
-          {/* Diálogo de Previsualización */}
-          <Dialog open={!!previewMember} onOpenChange={() => setPreviewMember(null)}>
-            <DialogContent className="rounded-[2.5rem] max-w-md border-border/60 shadow-2xl overflow-hidden p-0">
-              <div className="bg-primary/10 p-8 flex flex-col items-center text-center gap-2">
-                <div className="size-20 rounded-full bg-primary/20 flex items-center justify-center border-4 border-background shadow-xl">
-                  <Users className="size-10 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-black tracking-tight leading-none mb-1">
-                    {previewMember?.first_name} {previewMember?.last_name}
-                  </h2>
-                  <Badge className="bg-primary text-primary-foreground font-black text-[10px] uppercase rounded-full px-3">
-                    {previewMember?.area}
-                  </Badge>
-                </div>
-              </div>
-              
-              {previewMember && (
-                <div className="p-8 space-y-6">
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-1">
-                      <Label className="text-[10px] uppercase font-black text-muted-foreground/50 tracking-widest">Documento Nacional</Label>
-                      <p className="font-bold flex items-center gap-2"><CreditCard className="size-4 text-muted-foreground" /> {previewMember.dni}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px] uppercase font-black text-muted-foreground/50 tracking-widest">Teléfono Directo</Label>
-                      <p className="font-bold flex items-center gap-2"><Phone className="size-4 text-muted-foreground" /> {previewMember.phone}</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase font-black text-muted-foreground/50 tracking-widest">Domicilio Registrado</Label>
-                    <p className="text-sm font-semibold flex items-start gap-2"><MapPin className="size-4 text-muted-foreground mt-0.5" /> {previewMember.address}</p>
-                  </div>
-
-                  <div className="bg-card ring-1 ring-border/40 rounded-2xl p-5 flex justify-between items-center shadow-sm">
-                    <div className="space-y-1">
-                      <Label className="text-[10px] uppercase font-black text-primary/60 tracking-widest">Sueldo Líquido Final</Label>
-                      <p className="text-2xl font-black text-emerald-600">S/ {(previewMember.monthly_salary * (1 - (previewMember.health_deduction_pct + previewMember.pension_deduction_pct) / 100)).toFixed(2)}</p>
-                      <p className="text-[9px] font-bold text-muted-foreground italic">Bruto: S/ {Number(previewMember.monthly_salary).toFixed(2)} (Incl. {previewMember.pension_type})</p>
-                    </div>
-                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-none font-black text-[10px]">
-                      ESTADO: ACTIVO
-                    </Badge>
-                  </div>
-                </div>
-              )}
-              
-              <div className="p-8 pt-0">
-                <Button variant="secondary" onClick={() => setPreviewMember(null)} className="rounded-2xl font-black w-full h-12 uppercase tracking-widest text-xs">
-                  Cerrar Ficha
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
 
           {/* Diálogo de Confirmación de Eliminación */}
           <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
