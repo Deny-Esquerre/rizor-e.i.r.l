@@ -298,7 +298,7 @@ export default function InventoryPage() {
               <p className="text-muted-foreground">Gestiona el stock, precios y ubicación de tus productos.</p>
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               {selectedIds.length > 0 && (
                 <Button 
                   variant="destructive" 

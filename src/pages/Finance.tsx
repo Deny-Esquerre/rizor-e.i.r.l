@@ -418,7 +418,7 @@ export default function FinancePage() {
               <p className="text-muted-foreground">Administra ingresos, egresos y el flujo de caja de la planta.</p>
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               {selectedIds.length > 0 && (
                 <Button 
                   variant="destructive" 
