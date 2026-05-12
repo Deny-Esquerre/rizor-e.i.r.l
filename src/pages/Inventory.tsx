@@ -521,7 +521,7 @@ export default function InventoryPage() {
             <Table>
               <TableHeader className="bg-muted/50">
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="w-[40px] pl-6 pr-4">
+                  <TableHead className="w-[80px] pl-6 pr-4">
                     <Checkbox 
                       checked={filteredItems.length > 0 && selectedIds.length === filteredItems.length}
                       onCheckedChange={handleToggleSelectAll}
