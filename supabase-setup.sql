@@ -105,11 +105,35 @@ BEGIN
 END $$;
 
 -- ============================================================
--- NOTA: Los buckets de Storage DEBEN crearse manualmente desde
--- Supabase Dashboard > Storage > Create bucket:
---   - contracts (public)
---   - invoices (public)
---   - permissions (public)
---   - reports (public)
---   - others (public)
+-- 7. POLÍTICAS DE STORAGE (para permitir subida/lectura de PDFs)
+-- ============================================================
+DO $$
+DECLARE
+  b TEXT;
+BEGIN
+  FOREACH b IN ARRAY ARRAY['contracts', 'invoices', 'permissions', 'reports', 'others']
+  LOOP
+    INSERT INTO storage.buckets (id, name, public) VALUES (b, b, true)
+    ON CONFLICT (id) DO UPDATE SET public = true;
+
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'objects' AND policyname = b || '_public_read') THEN
+      EXECUTE format('CREATE POLICY %I ON storage.objects FOR SELECT TO public USING (bucket_id = %L)', b || '_public_read', b);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'objects' AND policyname = b || '_auth_insert') THEN
+      EXECUTE format('CREATE POLICY %I ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = %L)', b || '_auth_insert', b);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'objects' AND policyname = b || '_auth_delete') THEN
+      EXECUTE format('CREATE POLICY %I ON storage.objects FOR DELETE TO authenticated USING (bucket_id = %L)', b || '_auth_delete', b);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'objects' AND policyname = b || '_auth_update') THEN
+      EXECUTE format('CREATE POLICY %I ON storage.objects FOR UPDATE TO authenticated USING (bucket_id = %L) WITH CHECK (bucket_id = %L)', b || '_auth_update', b, b);
+    END IF;
+  END LOOP;
+END $$;
+
+-- ============================================================
+-- NOTA: Los buckets se crean automáticamente arriba.
+-- Si prefieres crearlos manualmente desde el Dashboard:
+-- Storage > Create bucket (público):
+--   contracts, invoices, permissions, reports, others
 -- ============================================================
