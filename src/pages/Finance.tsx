@@ -683,21 +683,21 @@ export default function FinancePage() {
             </DropdownMenu>
           </div>
 
-          <div className="rounded-md border border-border/60 bg-card shadow-sm overflow-hidden">
+          <div className="rounded-2xl border border-border/60 bg-card shadow-sm overflow-hidden">
             <Table>
               <TableHeader className="bg-muted/50">
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="w-[80px] pl-6 pr-4">
+                  <TableHead className="w-[80px] pl-8 pr-6">
                     <Checkbox 
                       checked={filteredItems.length > 0 && selectedIds.length === filteredItems.length}
                       onCheckedChange={handleToggleSelectAll}
                       aria-label="Seleccionar todo"
                     />
                   </TableHead>
-                  <TableHead className="w-[15%] font-bold text-foreground py-3">Fecha</TableHead>
-                  <TableHead className="w-[45%] font-bold text-foreground py-3">Detalle / Categoría</TableHead>
-                  <TableHead className="w-[20%] text-right font-bold text-foreground py-3">Monto</TableHead>
-                  <TableHead className="w-[20%] text-right font-bold text-foreground py-3 pr-6">Acciones</TableHead>
+                  <TableHead className="w-[15%] font-bold text-foreground py-4 px-4">Fecha</TableHead>
+                  <TableHead className="w-[45%] font-bold text-foreground py-4 px-4">Detalle / Categoría</TableHead>
+                  <TableHead className="w-[20%] text-right font-bold text-foreground py-4 px-4">Monto</TableHead>
+                  <TableHead className="w-[20%] text-right font-bold text-foreground py-4 pr-8 px-4">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -710,7 +710,7 @@ export default function FinancePage() {
                 ) : filteredItems.length > 0 ? (
                   filteredItems.map((item) => (
                     <TableRow key={item.id} className="group hover:bg-muted/30 transition-colors">
-                      <TableCell className="pl-6 pr-4">
+                      <TableCell className="pl-8 pr-6">
                         <Checkbox 
                           checked={selectedIds.includes(item.id)}
                           onCheckedChange={() => handleToggleSelect(item.id)}
