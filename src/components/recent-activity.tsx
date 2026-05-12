@@ -1,6 +1,21 @@
 import { useState, useEffect } from "react"
 import { IconCircleCheck, IconUserPlus, IconInfoCircle, IconLoader2 } from "@tabler/icons-react"
+import { FileSpreadsheet, FileText } from "lucide-react"
 import { supabase, isSupabaseConfigured } from "@/lib/supabase"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
+import * as XLSX from "xlsx"
+import jsPDF from "jspdf"
+import "jspdf-autotable"
+import { format } from "date-fns"
 
 interface Activity {
   id: string
@@ -10,9 +25,126 @@ interface Activity {
   date: string
 }
 
+interface Transaction {
+  id: string
+  date: string
+  description: string
+  type: string
+  category: string
+  amount: number
+  status: string
+}
+
+type Period = "week" | "month" | "all"
+type Format = "excel" | "pdf"
+
+function getPeriodRange(period: Period): { start: string; end: string } | null {
+  if (period === "all") return null
+  const now = new Date()
+  const end = now.toISOString().split("T")[0]
+
+  if (period === "week") {
+    const start = new Date(now)
+    start.setDate(start.getDate() - start.getDay())
+    return { start: start.toISOString().split("T")[0], end }
+  }
+
+  if (period === "month") {
+    const start = new Date(now.getFullYear(), now.getMonth(), 1)
+    return { start: start.toISOString().split("T")[0], end }
+  }
+
+  return null
+}
+
+async function fetchTransactionsByPeriod(period: Period): Promise<Transaction[]> {
+  let query = supabase
+    .from("transactions")
+    .select("id, date, description, type, category, amount, status")
+    .order("date", { ascending: false })
+
+  const range = getPeriodRange(period)
+  if (range) {
+    query = query.gte("date", range.start).lte("date", range.end)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return (data || []).map((t: any) => ({
+    id: t.id,
+    date: t.date,
+    description: t.description,
+    type: t.type,
+    category: t.category,
+    amount: Number(t.amount) || 0,
+    status: t.status,
+  }))
+}
+
+function exportToExcel(transactions: Transaction[], period: Period) {
+  try {
+    const periodLabel = period === "week" ? "Semanal" : period === "month" ? "Mensual" : "General"
+    const dataToExport = transactions.map(item => ({
+      Fecha: item.date,
+      Descripción: item.description,
+      Tipo: item.type,
+      Categoría: item.category,
+      Monto: item.amount,
+      Estado: item.status,
+    }))
+
+    const ws = XLSX.utils.json_to_sheet(dataToExport)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, "Finanzas")
+    XLSX.writeFile(wb, `Reporte_${periodLabel}_${format(new Date(), "ddMMyyyy")}.xlsx`)
+    toast.success(`Reporte ${periodLabel.toLowerCase()} exportado en Excel`)
+  } catch {
+    toast.error("Error al generar Excel")
+  }
+}
+
+function exportToPDF(transactions: Transaction[], period: Period) {
+  try {
+    const periodLabel = period === "week" ? "Semanal" : period === "month" ? "Mensual" : "General"
+    const doc = new jsPDF()
+    doc.setFontSize(18)
+    doc.text(`Reporte de Gestión Financiera - ${periodLabel}`, 14, 20)
+    doc.setFontSize(10)
+    doc.text(`Fecha de generación: ${format(new Date(), "dd/MM/yyyy HH:mm")}`, 14, 30)
+
+    const tableColumn = ["Fecha", "Descripción", "Tipo", "Categoría", "Monto", "Estado"]
+    const tableRows = transactions.map(item => [
+      item.date,
+      item.description,
+      item.type,
+      item.category,
+      `S/ ${item.amount.toFixed(2)}`,
+      item.status,
+    ])
+
+    ;(doc as any).autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 40,
+      theme: "striped",
+      headStyles: { fillColor: [79, 70, 229] },
+    })
+
+    doc.save(`Reporte_${periodLabel}_${format(new Date(), "ddMMyyyy")}.pdf`)
+    toast.success(`Reporte ${periodLabel.toLowerCase()} exportado en PDF`)
+  } catch {
+    toast.error("Error al generar PDF")
+  }
+}
+
 export function RecentActivity() {
   const [activities, setActivities] = useState<Activity[]>([])
   const [loading, setLoading] = useState(true)
+  const [exporting, setExporting] = useState<Format | null>(null)
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -87,6 +219,26 @@ export function RecentActivity() {
     fetchActivities()
   }, [])
 
+  const handleExport = async (format: Format, period: Period) => {
+    setExporting(format)
+    try {
+      const transactions = await fetchTransactionsByPeriod(period)
+      if (transactions.length === 0) {
+        toast.error("No hay transacciones en el período seleccionado")
+        return
+      }
+      if (format === "excel") {
+        exportToExcel(transactions, period)
+      } else {
+        exportToPDF(transactions, period)
+      }
+    } catch {
+      toast.error("Error al obtener datos financieros")
+    } finally {
+      setExporting(null)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-4 rounded-xl border border-border/50 bg-card/50">
@@ -133,6 +285,50 @@ export function RecentActivity() {
             <span className="text-sm text-muted-foreground">No hay actividad reciente por ahora</span>
           </div>
         )}
+      </div>
+
+      <div className="flex items-center gap-1 shrink-0">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon-xs" disabled={exporting === "excel"} className="hover:bg-emerald-500/10 h-7 w-7 rounded-lg">
+              <FileSpreadsheet className={`size-3.5 ${exporting === "excel" ? "animate-spin" : ""} text-emerald-600`} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-2xl p-2 border-border/40">
+            <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground/50 px-2 py-1">Exportar Excel</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => handleExport("excel", "week")} className="rounded-lg cursor-pointer py-2">
+              <span className="font-semibold text-sm">Esta Semana</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleExport("excel", "month")} className="rounded-lg cursor-pointer py-2">
+              <span className="font-semibold text-sm">Este Mes</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleExport("excel", "all")} className="rounded-lg cursor-pointer py-2">
+              <span className="font-semibold text-sm">General</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon-xs" disabled={exporting === "pdf"} className="hover:bg-rose-500/10 h-7 w-7 rounded-lg">
+              <FileText className={`size-3.5 ${exporting === "pdf" ? "animate-spin" : ""} text-rose-600`} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-2xl p-2 border-border/40">
+            <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground/50 px-2 py-1">Exportar PDF</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => handleExport("pdf", "week")} className="rounded-lg cursor-pointer py-2">
+              <span className="font-semibold text-sm">Esta Semana</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleExport("pdf", "month")} className="rounded-lg cursor-pointer py-2">
+              <span className="font-semibold text-sm">Este Mes</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleExport("pdf", "all")} className="rounded-lg cursor-pointer py-2">
+              <span className="font-semibold text-sm">General</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   )
