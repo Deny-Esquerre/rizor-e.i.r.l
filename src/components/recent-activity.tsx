@@ -287,15 +287,16 @@ export function RecentActivity() {
         )}
       </div>
 
-      <div className="flex items-center gap-1 shrink-0">
+      <div className="flex items-center gap-2 shrink-0">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon-xs" disabled={exporting === "excel"} className="hover:bg-emerald-500/10 h-7 w-7 rounded-lg">
-              <FileSpreadsheet className={`size-3.5 ${exporting === "excel" ? "animate-spin" : ""} text-emerald-600`} />
+            <Button variant="outline" disabled={exporting === "excel"} className="rounded-xl h-8 text-xs font-semibold shadow-sm border-border/60 px-3">
+              <FileSpreadsheet className={`size-3.5 mr-1.5 ${exporting === "excel" ? "animate-spin" : ""} text-emerald-600`} />
+              Exportar Excel
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-2xl p-2 border-border/40">
-            <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground/50 px-2 py-1">Exportar Excel</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-44 rounded-xl shadow-2xl p-2 border-border/40">
+            <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground/50 px-2 py-1">Seleccionar período</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleExport("excel", "week")} className="rounded-lg cursor-pointer py-2">
               <span className="font-semibold text-sm">Esta Semana</span>
@@ -311,12 +312,13 @@ export function RecentActivity() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon-xs" disabled={exporting === "pdf"} className="hover:bg-rose-500/10 h-7 w-7 rounded-lg">
-              <FileText className={`size-3.5 ${exporting === "pdf" ? "animate-spin" : ""} text-rose-600`} />
+            <Button variant="outline" disabled={exporting === "pdf"} className="rounded-xl h-8 text-xs font-semibold shadow-sm border-border/60 px-3">
+              <FileText className={`size-3.5 mr-1.5 ${exporting === "pdf" ? "animate-spin" : ""} text-rose-600`} />
+              Exportar PDF
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-2xl p-2 border-border/40">
-            <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground/50 px-2 py-1">Exportar PDF</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-44 rounded-xl shadow-2xl p-2 border-border/40">
+            <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground/50 px-2 py-1">Seleccionar período</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleExport("pdf", "week")} className="rounded-lg cursor-pointer py-2">
               <span className="font-semibold text-sm">Esta Semana</span>
