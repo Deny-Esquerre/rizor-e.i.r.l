@@ -73,12 +73,18 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Coins,
-  AlertTriangle
+  AlertTriangle,
+  Download,
+  FileSpreadsheet,
+  FileText
 } from "lucide-react"
 import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
+import * as XLSX from "xlsx"
+import jsPDF from "jspdf"
+import "jspdf-autotable"
 
 interface Transaction {
   id: string
@@ -157,7 +163,6 @@ export default function FinancePage() {
   React.useEffect(() => {
     fetchTransactions()
     fetchCategories()
-    toast.success("Sistema de Finanzas Conectado")
   }, [])
 
   const confirmNewCategory = async () => {
@@ -271,6 +276,60 @@ export default function FinancePage() {
     setItemToDeleteId(null)
   }
 
+  const exportToExcel = () => {
+    try {
+      const dataToExport = filteredItems.map(item => ({
+        Fecha: item.date,
+        Descripción: item.description,
+        Tipo: item.type,
+        Categoría: item.category,
+        Monto: item.amount,
+        Estado: item.status
+      }))
+
+      const ws = XLSX.utils.json_to_sheet(dataToExport)
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, ws, "Finanzas")
+      XLSX.writeFile(wb, `Reporte_Financiero_${format(new Date(), "ddMMyyyy")}.xlsx`)
+      toast.success("Archivo Excel generado correctamente")
+    } catch (error) {
+      toast.error("Error al generar Excel")
+    }
+  }
+
+  const exportToPDF = () => {
+    try {
+      const doc = new jsPDF()
+      doc.setFontSize(18)
+      doc.text("Reporte de Gestión Financiera", 14, 20)
+      doc.setFontSize(10)
+      doc.text(`Fecha de generación: ${format(new Date(), "dd/MM/yyyy HH:mm")}`, 14, 30)
+
+      const tableColumn = ["Fecha", "Descripción", "Tipo", "Categoría", "Monto", "Estado"]
+      const tableRows = filteredItems.map(item => [
+        item.date,
+        item.description,
+        item.type,
+        item.category,
+        `S/ ${item.amount.toFixed(2)}`,
+        item.status
+      ])
+
+      ;(doc as any).autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 40,
+        theme: 'striped',
+        headStyles: { fillColor: [79, 70, 229] }
+      })
+
+      doc.save(`Reporte_Financiero_${format(new Date(), "ddMMyyyy")}.pdf`)
+      toast.success("Archivo PDF generado correctamente")
+    } catch (error) {
+      toast.error("Error al generar PDF")
+    }
+  }
+
   const startEdit = (item: Transaction) => {
     setEditingId(item.id)
     setFormData({
@@ -313,143 +372,164 @@ export default function FinancePage() {
               <p className="text-muted-foreground">Administra ingresos, egresos y el flujo de caja de la planta.</p>
             </div>
             
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button onClick={resetForm} className="bg-primary hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg">
-                  <Plus className="mr-2 size-4" /> Nuevo Registro
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[450px]">
-                <form onSubmit={handleSubmit}>
-                  <DialogHeader>
-                    <DialogTitle>{editingId ? 'Editar Registro' : 'Nueva Operación'}</DialogTitle>
-                    <DialogDescription>
-                      Completa los detalles de la transacción financiera.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="rounded-xl shadow-sm border-border/60">
+                    <Download className="mr-2 size-4" /> Exportar
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-2xl p-2 border-border/40">
+                  <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground/50 px-2 py-1">Seleccionar formato</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={exportToExcel} className="rounded-lg cursor-pointer py-2">
+                    <FileSpreadsheet className="mr-2 size-4 text-emerald-600" /> 
+                    <span className="font-semibold text-sm">Excel (.xlsx)</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportToPDF} className="rounded-lg cursor-pointer py-2">
+                    <FileText className="mr-2 size-4 text-rose-600" /> 
+                    <span className="font-semibold text-sm">PDF (.pdf)</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button onClick={resetForm} className="bg-primary hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg">
+                    <Plus className="mr-2 size-4" /> Nuevo Registro
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[450px]">
+                  <form onSubmit={handleSubmit}>
+                    <DialogHeader>
+                      <DialogTitle>{editingId ? 'Editar Registro' : 'Nueva Operación'}</DialogTitle>
+                      <DialogDescription>
+                        Completa los detalles de la transacción financiera.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="type">Tipo</Label>
+                          <Select 
+                            value={formData.type} 
+                            onValueChange={v => setFormData({...formData, type: v as any})}
+                          >
+                            <SelectTrigger id="type" className="rounded-xl">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl">
+                              <SelectItem value="Ingreso">Ingreso (+)</SelectItem>
+                              <SelectItem value="Gasto">Gasto (-)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid gap-2">
+                          <Label>Fecha</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" className="w-full justify-start font-medium rounded-xl">
+                                <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
+                                {format(formData.date, "dd/MM/yyyy", { locale: es })}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={formData.date}
+                                onSelect={(d) => d && setFormData({...formData, date: d})}
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                      </div>
+
                       <div className="grid gap-2">
-                        <Label htmlFor="type">Tipo</Label>
+                        <Label htmlFor="description">Descripción</Label>
+                        <Input 
+                          id="description"
+                          placeholder="Ej. Venta de productos"
+                          value={formData.description} 
+                          onChange={e => setFormData({...formData, description: e.target.value})} 
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="category">Categoría</Label>
                         <Select 
-                          value={formData.type} 
-                          onValueChange={v => setFormData({...formData, type: v as any})}
+                          onValueChange={(v) => {
+                            if (v === "new") setIsAddingNewCategory(true)
+                            else { setIsAddingNewCategory(false); setFormData({...formData, category: v}) }
+                          }}
+                          value={isAddingNewCategory ? "new" : formData.category}
                         >
-                          <SelectTrigger id="type" className="rounded-xl">
-                            <SelectValue />
+                          <SelectTrigger id="category" className="rounded-xl">
+                            <SelectValue placeholder="Seleccionar..." />
                           </SelectTrigger>
                           <SelectContent className="rounded-xl">
-                            <SelectItem value="Ingreso">Ingreso (+)</SelectItem>
-                            <SelectItem value="Gasto">Gasto (-)</SelectItem>
+                            {localCategories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+                            <SelectSeparator />
+                            <SelectItem value="new" className="text-primary font-bold focus:text-primary focus:bg-primary/10 cursor-pointer">+ Nueva Categoría...</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="grid gap-2">
-                        <Label>Fecha</Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button variant="outline" className="w-full justify-start font-medium rounded-xl">
-                              <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
-                              {format(formData.date, "dd/MM/yyyy", { locale: es })}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={formData.date}
-                              onSelect={(d) => d && setFormData({...formData, date: d})}
-                            />
-                          </PopoverContent>
-                        </Popover>
+
+                      {isAddingNewCategory && (
+                        <div className="flex gap-2 animate-in slide-in-from-top-2 duration-300">
+                          <Input 
+                            placeholder="Nombre de la nueva categoría..." 
+                            className="flex-1 rounded-xl"
+                            autoFocus
+                            value={newCategoryName}
+                            onChange={(e) => setNewCategoryName(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), confirmNewCategory())}
+                          />
+                          <Button 
+                            type="button"
+                            size="icon" 
+                            className="shrink-0 bg-emerald-500 hover:bg-emerald-600 rounded-xl"
+                            onClick={confirmNewCategory}
+                          >
+                            <Plus className="size-4" />
+                          </Button>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="amount">Monto (S/)</Label>
+                          <Input 
+                            id="amount"
+                            type="number" 
+                            step="0.01" 
+                            value={formData.amount} 
+                            onChange={e => setFormData({...formData, amount: parseFloat(e.target.value) || 0})} 
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="status">Estado</Label>
+                          <Select 
+                            value={formData.status} 
+                            onValueChange={v => setFormData({...formData, status: v as any})}
+                          >
+                            <SelectTrigger id="status" className="rounded-xl">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl">
+                              <SelectItem value="Completado">Completado</SelectItem>
+                              <SelectItem value="Pendiente">Pendiente</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                     </div>
-
-                    <div className="grid gap-2">
-                      <Label htmlFor="description">Descripción</Label>
-                      <Input 
-                        id="description"
-                        placeholder="Ej. Venta de productos"
-                        value={formData.description} 
-                        onChange={e => setFormData({...formData, description: e.target.value})} 
-                      />
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label htmlFor="category">Categoría</Label>
-                      <Select 
-                        onValueChange={(v) => {
-                          if (v === "new") setIsAddingNewCategory(true)
-                          else { setIsAddingNewCategory(false); setFormData({...formData, category: v}) }
-                        }}
-                        value={isAddingNewCategory ? "new" : formData.category}
-                      >
-                        <SelectTrigger id="category" className="rounded-xl">
-                          <SelectValue placeholder="Seleccionar..." />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl">
-                          {localCategories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
-                          <SelectSeparator />
-                          <SelectItem value="new" className="text-primary font-bold focus:text-primary focus:bg-primary/10 cursor-pointer">+ Nueva Categoría...</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {isAddingNewCategory && (
-                      <div className="flex gap-2 animate-in slide-in-from-top-2 duration-300">
-                        <Input 
-                          placeholder="Nombre de la nueva categoría..." 
-                          className="flex-1 rounded-xl"
-                          autoFocus
-                          value={newCategoryName}
-                          onChange={(e) => setNewCategoryName(e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), confirmNewCategory())}
-                        />
-                        <Button 
-                          type="button"
-                          size="icon" 
-                          className="shrink-0 bg-emerald-500 hover:bg-emerald-600 rounded-xl"
-                          onClick={confirmNewCategory}
-                        >
-                          <Plus className="size-4" />
-                        </Button>
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="amount">Monto (S/)</Label>
-                        <Input 
-                          id="amount"
-                          type="number" 
-                          step="0.01" 
-                          value={formData.amount} 
-                          onChange={e => setFormData({...formData, amount: parseFloat(e.target.value) || 0})} 
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="status">Estado</Label>
-                        <Select 
-                          value={formData.status} 
-                          onValueChange={v => setFormData({...formData, status: v as any})}
-                        >
-                          <SelectTrigger id="status" className="rounded-xl">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="rounded-xl">
-                            <SelectItem value="Completado">Completado</SelectItem>
-                            <SelectItem value="Pendiente">Pendiente</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button variant="outline" type="button" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-                    <Button type="submit">{editingId ? 'Actualizar Registro' : 'Guardar Operación'}</Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
+                    <DialogFooter>
+                      <Button variant="outline" type="button" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
+                      <Button type="submit">{editingId ? 'Actualizar Registro' : 'Guardar Operación'}</Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

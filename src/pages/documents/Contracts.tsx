@@ -41,6 +41,7 @@ interface ContractRecord {
   contract_number: string
   worker_name: string
   contract_date: string
+  details: string
   file_name: string
   file_path: string
   file_size: number
@@ -68,6 +69,7 @@ export default function ContractsPage() {
   const [contractNumber, setContractNumber] = React.useState("")
   const [workerName, setWorkerName] = React.useState("")
   const [contractDate, setContractDate] = React.useState("")
+  const [details, setDetails] = React.useState("")
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
 
@@ -96,6 +98,7 @@ export default function ContractsPage() {
     setContractNumber("")
     setWorkerName("")
     setContractDate("")
+    setDetails("")
     setSelectedFile(null)
     if (fileInputRef.current) fileInputRef.current.value = ""
     setIsModalOpen(true)
@@ -107,6 +110,7 @@ export default function ContractsPage() {
     setContractNumber(c.contract_number)
     setWorkerName(c.worker_name)
     setContractDate(c.contract_date)
+    setDetails(c.details || "")
     setSelectedFile(null)
     if (fileInputRef.current) fileInputRef.current.value = ""
     setIsModalOpen(true)
@@ -178,6 +182,7 @@ export default function ContractsPage() {
           contract_number: contractNumber,
           worker_name: workerName,
           contract_date: contractDate,
+          details: details,
         }
         if (selectedFile) {
           updatePayload.file_name = fileName
@@ -194,6 +199,7 @@ export default function ContractsPage() {
           contract_number: contractNumber,
           worker_name: workerName,
           contract_date: contractDate,
+          details: details,
           file_name: fileName,
           file_path: filePath,
           file_size: fileSize,
@@ -357,9 +363,17 @@ export default function ContractsPage() {
                 <CardHeader className="bg-muted/30 pb-4 border-b shrink-0">
                   <CardTitle className="text-lg">Visualización del Documento</CardTitle>
                   {selectedContract ? (
-                    <CardDescription>
-                      Contrato: <span className="font-medium text-foreground">{selectedContract.contract_number}</span> • {selectedContract.worker_name}
-                    </CardDescription>
+                    <div className="space-y-1">
+                      <CardDescription>
+                        Contrato: <span className="font-medium text-foreground">{selectedContract.contract_number}</span> • {selectedContract.worker_name}
+                      </CardDescription>
+                      {selectedContract.details && (
+                        <p className="text-xs text-muted-foreground bg-primary/5 p-2 rounded-lg border border-primary/10">
+                          <span className="font-bold text-primary uppercase text-[10px] block mb-1">Detalles del Contrato:</span>
+                          {selectedContract.details}
+                        </p>
+                      )}
+                    </div>
                   ) : (
                     <CardDescription>Selecciona un contrato para previsualizarlo aquí.</CardDescription>
                   )}
@@ -421,6 +435,16 @@ export default function ContractsPage() {
               <div className="grid gap-2">
                 <Label>Fecha del Contrato</Label>
                 <DatePicker value={contractDate} onChange={setContractDate} />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="details">Detalles</Label>
+                <textarea
+                  id="details"
+                  value={details}
+                  onChange={e => setDetails(e.target.value)}
+                  placeholder="Ej. Contrato de tiempo parcial, renovable..."
+                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="file">
