@@ -345,9 +345,7 @@ export default function InvoicesPage() {
                             selectedId === inv.id ? "bg-muted/50 border-l-4 border-l-emerald-500" : "border-l-4 border-l-transparent"
                           )}
                         >
-                          <div className="p-4 bg-emerald-500/10 rounded-lg text-emerald-500 shrink-0">
-                            <img src="/icono_facturas.svg" alt="factura" className="size-20" />
-                          </div>
+
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-sm truncate text-foreground">{inv.client_name}</p>
                             <p className="text-xs text-muted-foreground mt-0.5">N° {inv.invoice_number} • {inv.invoice_date}</p>

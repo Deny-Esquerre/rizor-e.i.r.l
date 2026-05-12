@@ -339,9 +339,7 @@ export default function OthersPage() {
                             selectedId === doc.id ? "bg-muted/50 border-l-4 border-l-violet-500" : "border-l-4 border-l-transparent"
                           )}
                         >
-                          <div className="p-4 bg-violet-500/10 rounded-lg text-violet-500 shrink-0">
-                            <img src="/icono_otros.svg" alt="otro" className="size-20" />
-                          </div>
+
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-sm truncate text-foreground">{doc.name}</p>
                             <p className="text-xs text-muted-foreground mt-0.5">{doc.category}</p>

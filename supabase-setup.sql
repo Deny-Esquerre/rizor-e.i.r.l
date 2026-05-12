@@ -33,6 +33,8 @@ CREATE TABLE IF NOT EXISTS invoices (
 -- 3. TABLA: permissions
 CREATE TABLE IF NOT EXISTS permissions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  worker_id UUID DEFAULT NULL,
+  worker_name TEXT DEFAULT '',
   name TEXT NOT NULL,
   type TEXT NOT NULL DEFAULT 'Licencia',
   issue_date DATE,

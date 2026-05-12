@@ -345,9 +345,7 @@ export default function ReportsPage() {
                             selectedId === report.id ? "bg-muted/50 border-l-4 border-l-blue-500" : "border-l-4 border-l-transparent"
                           )}
                         >
-                          <div className="p-4 bg-blue-500/10 rounded-lg text-blue-500 shrink-0">
-                            <img src="/icono_reportes.svg" alt="reporte" className="size-20" />
-                          </div>
+
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-sm truncate text-foreground">{report.title}</p>
                             <p className="text-xs text-muted-foreground mt-0.5">{report.type} • {report.report_date}</p>

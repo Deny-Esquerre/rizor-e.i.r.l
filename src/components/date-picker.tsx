@@ -34,7 +34,6 @@ export function DatePicker({ value, onChange, placeholder = "Seleccionar fecha" 
           mode="single"
           selected={date}
           onSelect={(d) => onChange(d ? format(d, "yyyy-MM-dd") : "")}
-          initialFocus
         />
       </PopoverContent>
     </Popover>

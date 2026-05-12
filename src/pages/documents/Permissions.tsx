@@ -24,6 +24,13 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
   Upload,
   Search,
   Edit,
@@ -40,8 +47,16 @@ import { toast } from "sonner"
 
 const BUCKET = "permissions"
 
+interface Worker {
+  id: string
+  name: string
+  surname: string
+}
+
 interface PermissionRecord {
   id: string
+  worker_id: string
+  worker_name: string
   name: string
   type: string
   issue_date: string
@@ -57,6 +72,7 @@ interface PermissionRecord {
 
 export default function PermissionsPage() {
   const [permissions, setPermissions] = useState<PermissionRecord[]>([])
+  const [workers, setWorkers] = useState<Worker[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -69,6 +85,7 @@ export default function PermissionsPage() {
   const [isDragging, setIsDragging] = useState(false)
 
   const [formData, setFormData] = useState({
+    worker_id: "",
     name: "",
     type: "Licencia",
     issue_date: "",
@@ -79,7 +96,7 @@ export default function PermissionsPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => { fetchPermissions() }, [])
+  useEffect(() => { fetchPermissions(); fetchWorkers() }, [])
 
   const fetchPermissions = async () => {
     setLoading(true)
@@ -94,15 +111,29 @@ export default function PermissionsPage() {
     setLoading(false)
   }
 
+  const fetchWorkers = async () => {
+    const { data, error } = await supabase
+      .from("personnel")
+      .select("id, name, surname")
+      .order("name", { ascending: true })
+
+    if (!error && data) {
+      setWorkers(data)
+    }
+  }
+
+  const getWorkerName = (w: Worker) => `${w.name} ${w.surname}`
+
   const filtered = permissions.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.type.toLowerCase().includes(search.toLowerCase())
+    p.worker_name.toLowerCase().includes(search.toLowerCase()) ||
+    p.type.toLowerCase().includes(search.toLowerCase()) ||
+    p.name.toLowerCase().includes(search.toLowerCase())
   )
 
   const selectedPermission = permissions.find(p => p.id === selectedId)
 
   const resetForm = () => {
-    setFormData({ name: "", type: "Licencia", issue_date: "", expiry_date: "", status: "Vigente", description: "" })
+    setFormData({ worker_id: "", name: "", type: "Licencia", issue_date: "", expiry_date: "", status: "Vigente", description: "" })
     setSelectedFile(null)
     setEditingId(null)
     setIsEditing(false)
@@ -118,6 +149,7 @@ export default function PermissionsPage() {
     setIsEditing(true)
     setEditingId(p.id)
     setFormData({
+      worker_id: p.worker_id || "",
       name: p.name,
       type: p.type,
       issue_date: p.issue_date,
@@ -128,6 +160,15 @@ export default function PermissionsPage() {
     setSelectedFile(null)
     if (fileInputRef.current) fileInputRef.current.value = ""
     setIsModalOpen(true)
+  }
+
+  const handleWorkerChange = (workerId: string) => {
+    const worker = workers.find(w => w.id === workerId)
+    setFormData(prev => ({
+      ...prev,
+      worker_id: workerId,
+      name: worker ? `${worker.name} ${worker.surname}` : ""
+    }))
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -181,6 +222,10 @@ export default function PermissionsPage() {
       toast.error("Debes adjuntar un archivo PDF.")
       return
     }
+    if (!formData.worker_id) {
+      toast.error("Debes seleccionar un trabajador.")
+      return
+    }
     setSaving(true)
 
     try {
@@ -217,6 +262,8 @@ export default function PermissionsPage() {
 
       if (isEditing && editingId) {
         const updatePayload: Partial<PermissionRecord> = {
+          worker_id: formData.worker_id,
+          worker_name: formData.name,
           name: formData.name,
           type: formData.type,
           issue_date: formData.issue_date,
@@ -235,6 +282,8 @@ export default function PermissionsPage() {
         toast.success("Permiso actualizado correctamente")
       } else {
         const { error } = await supabase.from("permissions").insert({
+          worker_id: formData.worker_id,
+          worker_name: formData.name,
           name: formData.name,
           type: formData.type,
           issue_date: formData.issue_date,
@@ -323,7 +372,7 @@ export default function PermissionsPage() {
                 <Input
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  placeholder="Buscar por nombre o tipo..."
+                  placeholder="Buscar por trabajador o tipo..."
                   className="pl-9 bg-card rounded-xl border-border/60"
                 />
               </div>
@@ -355,11 +404,8 @@ export default function PermissionsPage() {
                             selectedId === perm.id ? "bg-muted/50 border-l-4 border-l-amber-500" : "border-l-4 border-l-transparent"
                           )}
                         >
-                          <div className="p-4 bg-amber-500/10 rounded-lg text-amber-500 shrink-0">
-                            <img src="/icono_permisos.svg" alt="permiso" className="size-20" />
-                          </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm truncate text-foreground">{perm.name}</p>
+                            <p className="font-semibold text-sm truncate text-foreground">{perm.worker_name}</p>
                             <p className="text-xs text-muted-foreground mt-0.5">{perm.type} • {perm.issue_date}</p>
                             <p className={cn("text-xs font-medium mt-0.5", perm.status === "Vigente" ? "text-emerald-600" : "text-rose-600")}>
                               {perm.status}
@@ -400,7 +446,7 @@ export default function PermissionsPage() {
                   <CardTitle className="text-lg">Visualización del Documento</CardTitle>
                   {selectedPermission ? (
                     <CardDescription>
-                      Permiso: <span className="font-medium text-foreground">{selectedPermission.name}</span> • {selectedPermission.type}
+                      Permiso de <span className="font-medium text-foreground">{selectedPermission.worker_name}</span> • {selectedPermission.type}
                     </CardDescription>
                   ) : (
                     <CardDescription>Selecciona un permiso para previsualizarlo aquí.</CardDescription>
@@ -416,7 +462,8 @@ export default function PermissionsPage() {
                   ) : selectedPermission ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground p-6 text-center">
                       <img src="/icono_permisos.svg" alt="visor" className="size-36 mx-auto opacity-50" />
-                      <p className="font-medium text-lg">{selectedPermission.name}</p>
+                      <p className="font-medium text-lg">{selectedPermission.worker_name}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{selectedPermission.type}</p>
                       <p className="text-sm text-muted-foreground mt-2">{selectedPermission.description}</p>
                       <div className="flex justify-center gap-4 mt-4">
                         <span className="text-xs text-muted-foreground">Emitido: {selectedPermission.issue_date}</span>
@@ -454,8 +501,19 @@ export default function PermissionsPage() {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Nombre del Permiso</Label>
-                <Input id="name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="Ej. Licencia de Funcionamiento" required />
+                <Label>Trabajador</Label>
+                <Select value={formData.worker_id} onValueChange={handleWorkerChange}>
+                  <SelectTrigger className="w-full bg-card rounded-xl border-border/60">
+                    <SelectValue placeholder="Seleccionar trabajador..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {workers.map(w => (
+                      <SelectItem key={w.id} value={w.id}>
+                        {getWorkerName(w)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="description">Descripción</Label>
@@ -552,8 +610,8 @@ export default function PermissionsPage() {
               <Trash2 className="size-5" /> Eliminar Permiso
             </DialogTitle>
             <DialogDescription className="pt-2">
-              ¿Estás seguro de que deseas eliminar el permiso{" "}
-              <span className="font-semibold text-foreground">{deleteTarget?.name}</span>?{" "}
+              ¿Estás seguro de que deseas eliminar el permiso de{" "}
+              <span className="font-semibold text-foreground">{deleteTarget?.worker_name}</span>?{" "}
               <span className="text-destructive font-medium">Esta acción no se puede deshacer.</span>
             </DialogDescription>
           </DialogHeader>
