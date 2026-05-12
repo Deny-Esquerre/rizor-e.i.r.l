@@ -257,7 +257,7 @@ export default function PersonnelPage() {
   }
 
   const handleDelete = (id: string) => {
-    setItemToDeleteId(id)
+    setMemberToDeleteId(id)
     setIsDeleteDialogOpen(true)
   }
 

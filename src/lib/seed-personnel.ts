@@ -49,7 +49,7 @@ const workers = [
 async function seed() {
   console.log('Iniciando carga masiva de personal...')
   
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('personnel')
     .insert(workers)
 
