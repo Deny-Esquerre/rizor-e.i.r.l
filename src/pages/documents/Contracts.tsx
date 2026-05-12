@@ -32,6 +32,7 @@ import {
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase"
+import { DatePicker } from "@/components/date-picker"
 
 const BUCKET = "contracts"
 
@@ -420,14 +421,8 @@ export default function ContractsPage() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="contractDate">Fecha del Contrato</Label>
-                <Input
-                  id="contractDate"
-                  type="date"
-                  value={contractDate}
-                  onChange={e => setContractDate(e.target.value)}
-                  required
-                />
+                <Label>Fecha del Contrato</Label>
+                <DatePicker value={contractDate} onChange={setContractDate} />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="file">
