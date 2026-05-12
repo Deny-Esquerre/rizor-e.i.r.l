@@ -11,7 +11,7 @@ import {
   Key,
   Files
 } from "lucide-react"
-import { Link, useNavigate, useLocation } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import { useTheme } from "@/components/theme-provider"
 
 import {
@@ -111,7 +111,6 @@ import logoUrlDark from "@/assets/2018/2.2.png"
 import logoUrlLight from "@/assets/2018/2.2.png"
 
 export function CustomSidebar() {
-  const navigate = useNavigate()
   const location = useLocation()
   const { setTheme, theme } = useTheme()
   const { isMobile } = useSidebar()
